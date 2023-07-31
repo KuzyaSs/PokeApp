@@ -27,4 +27,9 @@ class SearchFragment : Fragment() {
             binding.textInputEditTextSearch.text?.clear()
         }
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }
