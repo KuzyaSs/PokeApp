@@ -1,4 +1,4 @@
-package com.example.pokeapp.data.model
+package com.example.pokeapp.data.remote.model
 
 data class Crystal(
     val back_default: String,
