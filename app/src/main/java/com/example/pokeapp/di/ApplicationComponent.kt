@@ -13,6 +13,6 @@ interface ApplicationComponent {
 
     // Fragments
     fun inject(fragment: SearchFragment)
-    fun inject(activity: DetailFragment)
-    fun inject(activity: FavouriteFragment)
+    fun inject(fragment: DetailFragment)
+    fun inject(fragment: FavouriteFragment)
 }
