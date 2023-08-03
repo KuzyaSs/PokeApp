@@ -29,6 +29,10 @@ class PokemonAdapter(private val onItemClicked: (Pokemon) -> Unit) :
             binding.apply {
                 Glide.with(binding.root).load(pokemon.imageUrl).into(imageViewSprite)
                 textViewName.text = pokemon.name.plus(" (${pokemon.id})")
+
+                root.setOnClickListener {
+                    onItemClicked(pokemon)
+                }
             }
         }
     }

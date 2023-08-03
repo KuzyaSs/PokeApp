@@ -20,7 +20,11 @@
     <fragment
         android:id="@+id/detailFragment"
         android:name="com.example.pokeapp.ui.fragment.DetailFragment"
-        android:label="DetailFragment" />
+        android:label="DetailFragment">
+        <argument
+            android:name="pokemon"
+            app:argType="com.example.pokeapp.data.database.model.Pokemon" />
+    </fragment>
 
     <fragment
         android:id="@+id/favouriteFragment"
