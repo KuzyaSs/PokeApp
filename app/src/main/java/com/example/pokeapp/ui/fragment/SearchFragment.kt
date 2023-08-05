@@ -9,8 +9,10 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.pokeapp.PokeApplication
+import com.example.pokeapp.data.database.model.Pokemon
 import com.example.pokeapp.data.repository.PokeRepository
 import com.example.pokeapp.databinding.FragmentSearchBinding
 import com.example.pokeapp.ui.adapter.PokemonAdapter
@@ -38,7 +40,7 @@ class SearchFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -47,54 +49,19 @@ class SearchFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         (activity?.applicationContext as PokeApplication).applicationComponent.inject(this)
 
-        recyclerViewSetup()
-
-        binding.apply {
-            textInputLayoutSearch.setEndIconOnClickListener {
-                binding.textInputEditTextSearch.text?.clear()
-            }
-
-            buttonTryAgain.setOnClickListener {
-                viewModel.getPokemonList()
-                hideError()
-            }
-        }
-
-        viewModel.pokemonList.observe(viewLifecycleOwner) { pokemonList ->
-            when (pokemonList) {
-                is Resource.Success -> {
-                    hideProgressBar()
-                    hideError()
-                    pokemonAdapter.submitList(pokemonList.data?.toList())
-                }
-
-                is Resource.Error -> {
-                    hideProgressBar()
-                    pokemonAdapter.submitList(pokemonList.data?.toList())
-
-                    if (pokemonList.data?.isEmpty() != false) {
-                        pokemonList.message?.let { errorMessage ->
-                            showError(errorMessage)
-                        }
-                    } else {
-                        if (pokemonList.message?.isNotEmpty() != false)
-                            Toast.makeText(context, pokemonList.message, Toast.LENGTH_LONG).show()
-                    }
-                }
-
-                is Resource.Loading -> {
-                    showProgressBar()
-                }
-            }
-        }
+        setUpRecyclerView()
+        setUpListeners()
+        setUpObservers()
     }
 
-    private fun recyclerViewSetup() {
+    private fun setUpRecyclerView() {
         pokemonAdapter = PokemonAdapter { pokemon ->
+            viewModel.getPokemonDetail(pokemon.name)
             try {
                 val action = SearchFragmentDirections.actionSearchFragmentToDetailFragment(pokemon)
                 findNavController().navigate(action)
             } catch (_: Throwable) {
+
             }
         }
 
@@ -102,10 +69,76 @@ class SearchFragment : Fragment() {
             adapter = pokemonAdapter
             layoutManager = GridLayoutManager(context, SPAN_COUNT)
             addOnScrollListener(PokemonScrollListener {
-                if (!viewModel.isLastPage()) {
+                if (!viewModel.isLastPokemonListPage()) {
                     viewModel.getPokemonList()
                 }
             })
+        }
+    }
+
+    private fun setUpListeners() {
+        binding.apply {
+            textInputLayoutSearch.setEndIconOnClickListener {
+                binding.textInputEditTextSearch.text?.clear()
+            }
+
+            buttonTryAgain.setOnClickListener {
+                viewModel.getPokemonList()
+            }
+        }
+    }
+
+    private fun setUpObservers() {
+        viewModel.pokemonList.observe(viewLifecycleOwner) { pokemonListResource ->
+            when (pokemonListResource) {
+                is Resource.Success -> {
+                    hideProgressBar()
+                    pokemonListResource.data?.let { pokemonList ->
+                        pokemonAdapter.submitList(pokemonList.toList())
+                    }
+                }
+
+                is Resource.Error -> {
+                    hideProgressBar()
+                    showError(pokemonListResource)
+                    pokemonListResource.data?.let { pokemonList ->
+                        pokemonAdapter.submitList(pokemonList.toList())
+                    }
+                }
+
+                is Resource.Loading -> {
+                    hideErrorForEmptyList()
+                    showProgressBar()
+                }
+            }
+        }
+    }
+
+    private fun showError(pokemonListResource: Resource<MutableList<Pokemon>>) {
+        if (pokemonListResource.data?.isEmpty() != false) {
+            pokemonListResource.message?.let { errorMessage ->
+                showErrorForEmptyList(errorMessage)
+            }
+        } else {
+            if (pokemonListResource.message?.isNotEmpty() != false)
+                Toast.makeText(context, pokemonListResource.message, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun showErrorForEmptyList(errorMessage: String) {
+        binding.apply {
+            imageViewErrorIcon.isVisible = true
+            textViewErrorMessage.isVisible = true
+            buttonTryAgain.isVisible = true
+            textViewErrorMessage.text = errorMessage
+        }
+    }
+
+    private fun hideErrorForEmptyList() {
+        binding.apply {
+            imageViewErrorIcon.isVisible = false
+            textViewErrorMessage.isVisible = false
+            buttonTryAgain.isVisible = false
         }
     }
 
@@ -117,27 +150,9 @@ class SearchFragment : Fragment() {
         binding.progressBar.isVisible = false
     }
 
-    private fun showError(errorMessage: String) {
-        binding.apply {
-            imageViewErrorIcon.isVisible = true
-            textViewErrorMessage.isVisible = true
-            buttonTryAgain.isVisible = true
-
-            textViewErrorMessage.text = errorMessage
-        }
-    }
-
-    private fun hideError() {
-        binding.apply {
-            imageViewErrorIcon.isVisible = false
-            textViewErrorMessage.isVisible = false
-            buttonTryAgain.isVisible = false
-        }
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        viewModel.resetErrorMessage()
+        viewModel.clearPokemonListErrorMessage()
     }
 }

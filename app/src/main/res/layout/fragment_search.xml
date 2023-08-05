@@ -41,7 +41,7 @@
         android:layout_height="100dp"
         android:layout_marginTop="200dp"
         android:src="@drawable/ic_error"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="@id/recyclerViewPokemonList"
         app:layout_constraintStart_toStartOf="@id/recyclerViewPokemonList"
         app:layout_constraintTop_toTopOf="@id/recyclerViewPokemonList" />
@@ -51,7 +51,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/imageViewErrorIcon" />
@@ -63,7 +63,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="@string/try_again"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textViewErrorMessage" />

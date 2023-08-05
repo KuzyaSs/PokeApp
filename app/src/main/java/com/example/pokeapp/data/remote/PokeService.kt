@@ -1,7 +1,7 @@
 package com.example.pokeapp.data.remote
 
-import com.example.pokeapp.data.remote.model.Pokemon
-import com.example.pokeapp.data.remote.model.PokemonResponse
+import com.example.pokeapp.data.remote.model.PokemonDetail
+import com.example.pokeapp.data.remote.model.PokemonListResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -12,10 +12,10 @@ interface PokeService {
     suspend fun getPokemonList(
         @Query("limit") limit: Int,
         @Query("offset") offset: Int,
-    ): Response<PokemonResponse>
+    ): Response<PokemonListResponse>
 
     @GET("pokemon/{name}")
-    suspend fun getPokemonInfo(
+    suspend fun getPokemonDetail(
         @Path("name") name: String
-    ): Pokemon
+    ): Response<PokemonDetail>
 }

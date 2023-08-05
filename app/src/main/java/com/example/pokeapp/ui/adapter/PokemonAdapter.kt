@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.pokeapp.R
 import com.example.pokeapp.data.database.model.Pokemon
 import com.example.pokeapp.databinding.ItemPokemonBinding
 
@@ -27,8 +28,11 @@ class PokemonAdapter(private val onItemClicked: (Pokemon) -> Unit) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(pokemon: Pokemon) {
             binding.apply {
-                Glide.with(binding.root).load(pokemon.imageUrl).into(imageViewSprite)
-                textViewName.text = pokemon.name.plus(" (${pokemon.id})")
+                Glide.with(binding.root)
+                    .load(pokemon.imageUrl)
+                    .placeholder(R.drawable.anim_loading)
+                    .into(imageViewSprite)
+                textViewName.text = pokemon.name.replaceFirstChar { char -> char.uppercaseChar() }
 
                 root.setOnClickListener {
                     onItemClicked(pokemon)

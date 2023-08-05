@@ -6,7 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.pokeapp.data.database.model.Pokemon
-import com.example.pokeapp.data.remote.model.PokemonResponse
+import com.example.pokeapp.data.remote.model.PokemonDetail
+import com.example.pokeapp.data.remote.model.PokemonListResponse
 import com.example.pokeapp.data.repository.PokeRepository
 import com.example.pokeapp.util.Constants.Companion.BASE_IMAGE_URL
 import com.example.pokeapp.util.Constants.Companion.CONVERSION_ERROR_MESSAGE
@@ -21,10 +22,13 @@ import okio.IOException
 import retrofit2.Response
 
 class PokeViewModel(private val pokeRepository: PokeRepository) : ViewModel() {
-    private var _pokemonResponse: PokemonResponse? = null
+    private var _pokemonListResponse: PokemonListResponse? = null
 
     private val _pokemonList = MutableLiveData<Resource<MutableList<Pokemon>>>()
     val pokemonList: LiveData<Resource<MutableList<Pokemon>>> get() = _pokemonList
+
+    private val _pokemonDetail = MutableLiveData<Resource<PokemonDetail>>()
+    val pokemonDetail: LiveData<Resource<PokemonDetail>> get() = _pokemonDetail
 
     private var _bottomNavigationViewVisibility = MutableLiveData(true)
     val bottomNavigationViewVisibility: LiveData<Boolean> get() = _bottomNavigationViewVisibility
@@ -34,69 +38,119 @@ class PokeViewModel(private val pokeRepository: PokeRepository) : ViewModel() {
     }
 
     fun getPokemonList() {
-        if (_pokemonList.value !is Resource.Loading) {
-            viewModelScope.launch(Dispatchers.IO) {
-                _pokemonList.postValue(Resource.Loading(_pokemonList.value?.data))
-                try {
-                    val pokemonResponse = pokeRepository.getPokemonList(
-                        getLimitFromUrl(_pokemonResponse?.next),
-                        getOffsetFromUrl(_pokemonResponse?.next)
+        viewModelScope.launch(Dispatchers.IO) {
+            _pokemonList.postValue(Resource.Loading(_pokemonList.value?.data))
+            try {
+                val pokemonListResponse = pokeRepository.getPokemonList(
+                    getLimitFromUrl(_pokemonListResponse?.next),
+                    getOffsetFromUrl(_pokemonListResponse?.next)
+                )
+                _pokemonList.postValue(handlePokemonListResponse(pokemonListResponse))
+            } catch (throwable: Throwable) {
+                when (throwable) {
+                    is IOException -> _pokemonList.postValue(
+                        Resource.Error(
+                            _pokemonList.value?.data,
+                            NETWORK_ERROR_MESSAGE
+                        )
                     )
-                    _pokemonList.postValue(handlePokemonResponse(pokemonResponse))
-                } catch (throwable: Throwable) {
-                    when (throwable) {
-                        is IOException -> _pokemonList.postValue(
-                            Resource.Error(
-                                _pokemonList.value?.data,
-                                message = NETWORK_ERROR_MESSAGE
-                            )
-                        )
 
-                        else -> _pokemonList.postValue(
-                            Resource.Error(
-                                _pokemonList.value?.data,
-                                message = CONVERSION_ERROR_MESSAGE
-                            )
+                    else -> _pokemonList.postValue(
+                        Resource.Error(
+                            _pokemonList.value?.data,
+                            CONVERSION_ERROR_MESSAGE
                         )
-                    }
+                    )
                 }
             }
         }
     }
 
-    fun isLastPage(): Boolean {
-        if (_pokemonResponse?.previous?.isNotEmpty() == true && _pokemonResponse?.next.isNullOrEmpty()) {
+    fun getPokemonDetail(pokemonName: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _pokemonDetail.postValue(Resource.Loading(_pokemonDetail.value?.data))
+            try {
+                val pokemonDetailResponse = pokeRepository.getPokemonDetail(pokemonName)
+                _pokemonDetail.postValue(handlePokemonDetailResponse(pokemonDetailResponse))
+            } catch (throwable: Throwable) {
+                when (throwable) {
+                    is IOException -> _pokemonDetail.postValue(
+                        Resource.Error(
+                            _pokemonDetail.value?.data,
+                            NETWORK_ERROR_MESSAGE
+                        )
+                    )
+
+                    else -> _pokemonDetail.postValue(
+                        Resource.Error(
+                            _pokemonDetail.value?.data,
+                            CONVERSION_ERROR_MESSAGE
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    fun setIsFavourite() {
+        _pokemonDetail.value?.data?.let { pokemonDetail ->
+            if (pokemonDetail.isFavourite) {
+                // Delete from database
+            } else {
+                // Insert to database
+            }
+
+            pokemonDetail.isFavourite = !pokemonDetail.isFavourite // Delete late. Change with...
+            // pokemonDetail.isFavourite = pokeRepository.isFavourite(pokemonDetail.id)         it
+
+            _pokemonDetail.postValue(Resource.Success(pokemonDetail))
+        }
+    }
+
+    fun isLastPokemonListPage(): Boolean {
+        if (_pokemonListResponse?.previous?.isNotEmpty() == true && _pokemonListResponse?.next.isNullOrEmpty()) {
             return true
         }
         return false
     }
 
-    fun resetErrorMessage() {
-        when(_pokemonList.value) {
-            is Resource.Error -> {
-                if (_pokemonList.value?.data?.isNotEmpty() == true) {
-                    _pokemonList.postValue(
-                        Resource.Error(
-                            _pokemonList.value?.data,
-                            EMPTY_ERROR_MESSAGE
-                        )
+    fun clearPokemonListErrorMessage() {
+        _pokemonList.value?.data?.let { pokemonList ->
+            if (pokemonList.isNotEmpty()) {
+                _pokemonList.postValue(
+                    Resource.Error(
+                        _pokemonList.value?.data,
+                        EMPTY_ERROR_MESSAGE
                     )
-                }
+                )
             }
-            else -> { }
         }
+        /*        when (_pokemonList.value) {
+                    is Resource.Error -> {
+                        _pokemonList.value?.data?.let { pokemonList ->
+                            if (pokemonList.isNotEmpty()) {
+                                _pokemonList.postValue(
+                                    Resource.Error(
+                                        _pokemonList.value?.data,
+                                        EMPTY_ERROR_MESSAGE
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }*/
     }
 
     fun setBottomNavigationViewVisibility(isVisible: Boolean) {
         _bottomNavigationViewVisibility.postValue(isVisible)
     }
 
-    private fun handlePokemonResponse(response: Response<PokemonResponse>): Resource<MutableList<Pokemon>> {
+    private fun handlePokemonListResponse(response: Response<PokemonListResponse>): Resource<MutableList<Pokemon>> {
         if (response.isSuccessful) {
-            response.body()?.let { pokemonResponse ->
-                _pokemonResponse = pokemonResponse
+            response.body()?.let { pokemonListResponse ->
+                _pokemonListResponse = pokemonListResponse
 
-                val pokemonList: List<Pokemon> = pokemonResponse.results.map { pokemon ->
+                val pokemonList = pokemonListResponse.results.map { pokemon ->
                     val pokemonId = pokemon.url.dropLast(1).takeLastWhile { char ->
                         char.isDigit()
                     }.toInt()
@@ -106,16 +160,26 @@ class PokeViewModel(private val pokeRepository: PokeRepository) : ViewModel() {
                         pokemon.name,
                         BASE_IMAGE_URL.plus("$pokemonId.png")
                     )
-                }
+                }.toMutableList()
 
                 _pokemonList.value?.data?.let { oldPokemonList ->
                     oldPokemonList.addAll(pokemonList)
                     return Resource.Success(oldPokemonList)
                 }
-                return Resource.Success(pokemonList.toMutableList())
+                return Resource.Success(pokemonList)
             }
         }
-        return Resource.Error(message = response.message())
+        return Resource.Error(_pokemonList.value?.data, response.message())
+    }
+
+    private fun handlePokemonDetailResponse(response: Response<PokemonDetail>): Resource<PokemonDetail> {
+        if (response.isSuccessful) {
+            response.body()?.let { pokemonDetail ->
+                // pokemonDetail.isFavourite = pokeRepository.isFavourite(pokemonDetail.id)
+                return Resource.Success(pokemonDetail)
+            }
+        }
+        return Resource.Error(_pokemonDetail.value?.data, response.message())
     }
 
     private fun getLimitFromUrl(url: String?): Int {
