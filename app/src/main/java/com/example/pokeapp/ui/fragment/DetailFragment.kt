@@ -8,12 +8,14 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.pokeapp.PokeApplication
 import com.example.pokeapp.R
 import com.example.pokeapp.data.remote.model.PokemonDetail
 import com.example.pokeapp.repository.PokeRepository
 import com.example.pokeapp.databinding.FragmentDetailBinding
+import com.example.pokeapp.ui.adapter.TypeAdapter
 import com.example.pokeapp.ui.viewModel.PokeViewModel
 import com.example.pokeapp.ui.viewModel.PokeViewModelFactory
 import com.example.pokeapp.util.Resource
@@ -32,6 +34,8 @@ class DetailFragment : Fragment() {
     @Inject
     lateinit var pokeRepository: PokeRepository
 
+    private lateinit var typeAdapter: TypeAdapter
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -46,8 +50,18 @@ class DetailFragment : Fragment() {
         (activity?.applicationContext as PokeApplication).applicationComponent.inject(this)
         viewModel.setBottomNavigationViewVisibility(false)
 
+        setUpRecyclerView()
         setUpListeners()
         setUpObservers()
+    }
+
+    private fun setUpRecyclerView() {
+        typeAdapter = TypeAdapter()
+
+        binding.recyclerViewTypeList.apply {
+            adapter = typeAdapter
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        }
     }
 
     private fun setUpListeners() {
@@ -92,6 +106,7 @@ class DetailFragment : Fragment() {
     }
 
     private fun setUpPokemonDetail(pokemonDetail: PokemonDetail) {
+        typeAdapter.submitList(pokemonDetail.types.map { type -> type.type })
         binding.apply {
             textViewId.text = getString(R.string.id, pokemonDetail.id.toString())
             textViewName.text = pokemonDetail.name.replaceFirstChar { firstChar ->

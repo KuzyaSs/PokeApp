@@ -12,5 +12,7 @@ class Constants {
         const val CONVERSION_ERROR_MESSAGE = "Conversion error"
 
         const val SPAN_COUNT = 2
+
+        const val ERROR_POKEMON_ID = -1
     }
 }

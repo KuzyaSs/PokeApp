@@ -98,15 +98,11 @@ class SearchFragment : Fragment() {
     private fun setUpObservers() {
         viewModel.pokemonList.observe(viewLifecycleOwner) { pokemonListResource ->
             when (pokemonListResource) {
-                is Resource.Success -> {
+
+                is Resource.Success, is Resource.Error -> {
                     hideProgressBar()
                     val searchString = binding.textInputEditTextSearch.text.toString()
                     setPokemonList(searchString)
-                }
-
-                is Resource.Error -> {
-                    hideProgressBar()
-                    setErrorPokemonList()
                 }
 
                 is Resource.Loading -> {
@@ -120,11 +116,6 @@ class SearchFragment : Fragment() {
         val pokemonList = viewModel.getPokemonList(searchString)
         pokemonAdapter.submitList(pokemonList.toList())
         handleMessage(pokemonList)
-    }
-
-    private fun setErrorPokemonList() {
-        val errorPokemonList = viewModel.getErrorPokemonList()
-        pokemonAdapter.submitList(errorPokemonList)
     }
 
     private fun handleMessage(pokemonList: List<Pokemon>) {

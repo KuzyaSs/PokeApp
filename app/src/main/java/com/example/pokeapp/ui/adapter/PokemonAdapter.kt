@@ -9,6 +9,7 @@ import com.bumptech.glide.Glide
 import com.example.pokeapp.R
 import com.example.pokeapp.data.database.model.Pokemon
 import com.example.pokeapp.databinding.ItemPokemonBinding
+import com.example.pokeapp.util.Constants.Companion.ERROR_POKEMON_ID
 
 class PokemonAdapter(private val onItemClicked: (Pokemon) -> Unit) :
     ListAdapter<Pokemon, PokemonAdapter.PokemonViewHolder>(DiffCallback) {
@@ -27,7 +28,7 @@ class PokemonAdapter(private val onItemClicked: (Pokemon) -> Unit) :
     inner class PokemonViewHolder(private val binding: ItemPokemonBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(pokemon: Pokemon) {
-            if (pokemon.id > 0) {
+            if (pokemon.id > ERROR_POKEMON_ID) {
                 setPokemon(pokemon)
             } else {
                 setErrorPokemon(pokemon)

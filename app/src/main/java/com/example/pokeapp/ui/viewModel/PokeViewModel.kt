@@ -13,6 +13,7 @@ import com.example.pokeapp.util.Constants.Companion.BASE_IMAGE_URL
 import com.example.pokeapp.util.Constants.Companion.CONVERSION_ERROR_MESSAGE
 import com.example.pokeapp.util.Constants.Companion.DEFAULT_RESPONSE_LIMIT
 import com.example.pokeapp.util.Constants.Companion.DEFAULT_RESPONSE_OFFSET
+import com.example.pokeapp.util.Constants.Companion.ERROR_POKEMON_ID
 import com.example.pokeapp.util.Constants.Companion.NETWORK_ERROR_MESSAGE
 import com.example.pokeapp.util.Resource
 import kotlinx.coroutines.Dispatchers
@@ -44,27 +45,23 @@ class PokeViewModel(private val pokeRepository: PokeRepository) : ViewModel() {
         val newPokemonList = mutableListOf<Pokemon>()
         _pokemonList.value?.data?.let { pokemonList ->
             if (searchString.isBlank()) {
-                return pokemonList
+                newPokemonList.addAll(pokemonList)
+            } else {
+                newPokemonList.addAll(pokemonList.filter { pokemon ->
+                    pokemon.name.startsWith(searchString)
+                })
+                return newPokemonList
             }
-            newPokemonList.addAll(pokemonList.filter { pokemon ->
-                pokemon.name.startsWith(searchString)
-            })
+        }
+        if (searchString.isBlank()) {
+            _pokemonList.value?.message?.let { errorMessage ->
+                for (i in 0 until DEFAULT_RESPONSE_LIMIT) {
+                    val errorPokemon = Pokemon(ERROR_POKEMON_ID, errorMessage, errorMessage)
+                    newPokemonList.add(errorPokemon)
+                }
+            }
         }
         return newPokemonList
-    }
-
-    fun getErrorPokemonList(): MutableList<Pokemon> {
-        val errorPokemonList = mutableListOf<Pokemon>()
-        _pokemonList.value?.data?.let { pokemonList ->
-            errorPokemonList.addAll(pokemonList)
-        }
-        _pokemonList.value?.message?.let { errorMessage ->
-            for (i in 0 until DEFAULT_RESPONSE_LIMIT) {
-                val errorPokemon = Pokemon(-1, errorMessage, errorMessage)
-                errorPokemonList.add(errorPokemon)
-            }
-        }
-        return errorPokemonList
     }
 
     fun getFavouritePokemonList(searchString: String): List<Pokemon> {
