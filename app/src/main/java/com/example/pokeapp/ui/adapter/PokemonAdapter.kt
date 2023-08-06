@@ -27,16 +27,34 @@ class PokemonAdapter(private val onItemClicked: (Pokemon) -> Unit) :
     inner class PokemonViewHolder(private val binding: ItemPokemonBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(pokemon: Pokemon) {
+            if (pokemon.id > 0) {
+                setPokemon(pokemon)
+            } else {
+                setErrorPokemon(pokemon)
+            }
+        }
+
+        private fun setPokemon(pokemon: Pokemon) {
             binding.apply {
                 Glide.with(binding.root)
                     .load(pokemon.imageUrl)
                     .placeholder(R.drawable.anim_loading)
                     .into(imageViewSprite)
-                textViewName.text = pokemon.name.replaceFirstChar { char -> char.uppercaseChar() }
+
+                textViewName.text = pokemon.name.replaceFirstChar { firstChar ->
+                    firstChar.uppercaseChar()
+                }
 
                 root.setOnClickListener {
                     onItemClicked(pokemon)
                 }
+            }
+        }
+
+        private fun setErrorPokemon(pokemon: Pokemon) {
+            binding.apply {
+                imageViewSprite.setImageResource(R.drawable.ic_error)
+                textViewName.text = pokemon.name
             }
         }
     }

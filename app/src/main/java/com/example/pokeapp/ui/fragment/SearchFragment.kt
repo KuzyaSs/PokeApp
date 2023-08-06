@@ -4,16 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.pokeapp.PokeApplication
 import com.example.pokeapp.data.database.model.Pokemon
-import com.example.pokeapp.data.repository.PokeRepository
+import com.example.pokeapp.repository.PokeRepository
 import com.example.pokeapp.databinding.FragmentSearchBinding
 import com.example.pokeapp.ui.adapter.PokemonAdapter
 import com.example.pokeapp.ui.other.PokemonScrollListener
@@ -56,7 +55,7 @@ class SearchFragment : Fragment() {
 
     private fun setUpRecyclerView() {
         pokemonAdapter = PokemonAdapter { pokemon ->
-            viewModel.getPokemonDetail(pokemon.name)
+            viewModel.setPokemonDetail(pokemon.name)
             try {
                 val action = SearchFragmentDirections.actionSearchFragmentToDetailFragment(pokemon)
                 findNavController().navigate(action)
@@ -69,8 +68,9 @@ class SearchFragment : Fragment() {
             adapter = pokemonAdapter
             layoutManager = GridLayoutManager(context, SPAN_COUNT)
             addOnScrollListener(PokemonScrollListener {
-                if (!viewModel.isLastPokemonListPage()) {
-                    viewModel.getPokemonList()
+                val searchString = binding.textInputEditTextSearch.text.toString()
+                if (!viewModel.isLastPokemonListPage() && searchString.isEmpty()) {
+                    viewModel.setPokemonList()
                 }
             })
         }
@@ -82,8 +82,15 @@ class SearchFragment : Fragment() {
                 binding.textInputEditTextSearch.text?.clear()
             }
 
+            textInputEditTextSearch.addTextChangedListener { editable ->
+                editable?.let {
+                    val searchString = editable.toString()
+                    setPokemonList(searchString)
+                }
+            }
+
             buttonTryAgain.setOnClickListener {
-                viewModel.getPokemonList()
+                viewModel.setPokemonList()
             }
         }
     }
@@ -93,52 +100,52 @@ class SearchFragment : Fragment() {
             when (pokemonListResource) {
                 is Resource.Success -> {
                     hideProgressBar()
-                    pokemonListResource.data?.let { pokemonList ->
-                        pokemonAdapter.submitList(pokemonList.toList())
-                    }
+                    val searchString = binding.textInputEditTextSearch.text.toString()
+                    setPokemonList(searchString)
                 }
 
                 is Resource.Error -> {
                     hideProgressBar()
-                    showError(pokemonListResource)
-                    pokemonListResource.data?.let { pokemonList ->
-                        pokemonAdapter.submitList(pokemonList.toList())
-                    }
+                    setErrorPokemonList()
                 }
 
                 is Resource.Loading -> {
-                    hideErrorForEmptyList()
                     showProgressBar()
                 }
             }
         }
     }
 
-    private fun showError(pokemonListResource: Resource<MutableList<Pokemon>>) {
-        if (pokemonListResource.data?.isEmpty() != false) {
-            pokemonListResource.message?.let { errorMessage ->
-                showErrorForEmptyList(errorMessage)
-            }
+    private fun setPokemonList(searchString: String) {
+        val pokemonList = viewModel.getPokemonList(searchString)
+        pokemonAdapter.submitList(pokemonList.toList())
+        handleMessage(pokemonList)
+    }
+
+    private fun setErrorPokemonList() {
+        val errorPokemonList = viewModel.getErrorPokemonList()
+        pokemonAdapter.submitList(errorPokemonList)
+    }
+
+    private fun handleMessage(pokemonList: List<Pokemon>) {
+        if (pokemonList.isEmpty()) {
+            showMessage()
         } else {
-            if (pokemonListResource.message?.isNotEmpty() != false)
-                Toast.makeText(context, pokemonListResource.message, Toast.LENGTH_LONG).show()
+            hideMessage()
         }
     }
 
-    private fun showErrorForEmptyList(errorMessage: String) {
+    private fun showMessage() {
         binding.apply {
-            imageViewErrorIcon.isVisible = true
-            textViewErrorMessage.isVisible = true
-            buttonTryAgain.isVisible = true
-            textViewErrorMessage.text = errorMessage
+            imageViewEmptyIcon.isVisible = true
+            textViewMessage.isVisible = true
         }
     }
 
-    private fun hideErrorForEmptyList() {
+    private fun hideMessage() {
         binding.apply {
-            imageViewErrorIcon.isVisible = false
-            textViewErrorMessage.isVisible = false
-            buttonTryAgain.isVisible = false
+            imageViewEmptyIcon.isVisible = false
+            textViewMessage.isVisible = false
         }
     }
 
@@ -153,6 +160,5 @@ class SearchFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        viewModel.clearPokemonListErrorMessage()
     }
 }

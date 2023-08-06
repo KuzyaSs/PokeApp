@@ -10,7 +10,6 @@ class Constants {
 
         const val NETWORK_ERROR_MESSAGE = "Network error"
         const val CONVERSION_ERROR_MESSAGE = "Conversion error"
-        const val EMPTY_ERROR_MESSAGE = ""
 
         const val SPAN_COUNT = 2
     }

@@ -1,7 +1,6 @@
 package com.example.pokeapp.di
 
 import com.example.pokeapp.data.remote.PokeService
-import com.example.pokeapp.data.repository.PokeRepository
 import com.example.pokeapp.util.Constants.Companion.BASE_URL
 import dagger.Module
 import dagger.Provides
@@ -31,10 +30,5 @@ class RemoteModule {
     @Provides
     fun providePokeService(retrofit: Retrofit): PokeService {
         return retrofit.create(PokeService::class.java)
-    }
-
-    @Provides
-    fun providePokeRepository(pokeService: PokeService): PokeRepository {
-        return PokeRepository(pokeService)
     }
 }

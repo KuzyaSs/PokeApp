@@ -1,9 +1,13 @@
 package com.example.pokeapp.data.database.model
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.io.Serializable
 
+@Entity(tableName = "pokemon")
 data class Pokemon(
-    val id: Int,
+    @PrimaryKey val id: Int,
     val name: String,
-    val imageUrl: String
+    @ColumnInfo(name = "image_url") val imageUrl: String
 ) : Serializable

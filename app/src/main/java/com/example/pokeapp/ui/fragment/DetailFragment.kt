@@ -12,7 +12,7 @@ import com.bumptech.glide.Glide
 import com.example.pokeapp.PokeApplication
 import com.example.pokeapp.R
 import com.example.pokeapp.data.remote.model.PokemonDetail
-import com.example.pokeapp.data.repository.PokeRepository
+import com.example.pokeapp.repository.PokeRepository
 import com.example.pokeapp.databinding.FragmentDetailBinding
 import com.example.pokeapp.ui.viewModel.PokeViewModel
 import com.example.pokeapp.ui.viewModel.PokeViewModelFactory
@@ -57,11 +57,11 @@ class DetailFragment : Fragment() {
             }
 
             imageViewIsFavourite.setOnClickListener {
-                viewModel.setIsFavourite()
+                viewModel.setIsFavourite(arguments.pokemon)
             }
 
             buttonTryAgain.setOnClickListener {
-                viewModel.getPokemonDetail(arguments.pokemon.name)
+                viewModel.setPokemonDetail(arguments.pokemon.name)
             }
         }
     }

@@ -40,6 +40,7 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginTop="200dp"
+        android:importantForAccessibility="no"
         android:src="@drawable/ic_error"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="@id/recyclerViewPokemonList"
@@ -67,6 +68,29 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textViewErrorMessage" />
+
+    <ImageView
+        android:id="@+id/imageViewEmptyIcon"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_marginTop="200dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_no_search_results"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/recyclerViewPokemonList" />
+
+    <TextView
+        android:id="@+id/textViewMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/no_search_results"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imageViewEmptyIcon" />
 
     <ProgressBar
         android:id="@+id/progressBar"

@@ -8,12 +8,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.pokeapp.data.database.model.Pokemon
 import com.example.pokeapp.data.remote.model.PokemonDetail
 import com.example.pokeapp.data.remote.model.PokemonListResponse
-import com.example.pokeapp.data.repository.PokeRepository
+import com.example.pokeapp.repository.PokeRepository
 import com.example.pokeapp.util.Constants.Companion.BASE_IMAGE_URL
 import com.example.pokeapp.util.Constants.Companion.CONVERSION_ERROR_MESSAGE
 import com.example.pokeapp.util.Constants.Companion.DEFAULT_RESPONSE_LIMIT
 import com.example.pokeapp.util.Constants.Companion.DEFAULT_RESPONSE_OFFSET
-import com.example.pokeapp.util.Constants.Companion.EMPTY_ERROR_MESSAGE
 import com.example.pokeapp.util.Constants.Companion.NETWORK_ERROR_MESSAGE
 import com.example.pokeapp.util.Resource
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +26,10 @@ class PokeViewModel(private val pokeRepository: PokeRepository) : ViewModel() {
     private val _pokemonList = MutableLiveData<Resource<MutableList<Pokemon>>>()
     val pokemonList: LiveData<Resource<MutableList<Pokemon>>> get() = _pokemonList
 
+    private var _favouritePokemonList: LiveData<List<Pokemon>> =
+        pokeRepository.getFavouritePokemonList()
+    val favouritePokemonList: LiveData<List<Pokemon>> get() = _favouritePokemonList
+
     private val _pokemonDetail = MutableLiveData<Resource<PokemonDetail>>()
     val pokemonDetail: LiveData<Resource<PokemonDetail>> get() = _pokemonDetail
 
@@ -34,10 +37,50 @@ class PokeViewModel(private val pokeRepository: PokeRepository) : ViewModel() {
     val bottomNavigationViewVisibility: LiveData<Boolean> get() = _bottomNavigationViewVisibility
 
     init {
-        getPokemonList()
+        setPokemonList()
     }
 
-    fun getPokemonList() {
+    fun getPokemonList(searchString: String): MutableList<Pokemon> {
+        val newPokemonList = mutableListOf<Pokemon>()
+        _pokemonList.value?.data?.let { pokemonList ->
+            if (searchString.isBlank()) {
+                return pokemonList
+            }
+            newPokemonList.addAll(pokemonList.filter { pokemon ->
+                pokemon.name.startsWith(searchString)
+            })
+        }
+        return newPokemonList
+    }
+
+    fun getErrorPokemonList(): MutableList<Pokemon> {
+        val errorPokemonList = mutableListOf<Pokemon>()
+        _pokemonList.value?.data?.let { pokemonList ->
+            errorPokemonList.addAll(pokemonList)
+        }
+        _pokemonList.value?.message?.let { errorMessage ->
+            for (i in 0 until DEFAULT_RESPONSE_LIMIT) {
+                val errorPokemon = Pokemon(-1, errorMessage, errorMessage)
+                errorPokemonList.add(errorPokemon)
+            }
+        }
+        return errorPokemonList
+    }
+
+    fun getFavouritePokemonList(searchString: String): List<Pokemon> {
+        val newPokemonList = mutableListOf<Pokemon>()
+        _favouritePokemonList.value?.let { pokemonList ->
+            if (searchString.isBlank()) {
+                return pokemonList
+            }
+            newPokemonList.addAll(pokemonList.filter { pokemon ->
+                pokemon.name.startsWith(searchString)
+            })
+        }
+        return newPokemonList
+    }
+
+    fun setPokemonList() {
         viewModelScope.launch(Dispatchers.IO) {
             _pokemonList.postValue(Resource.Loading(_pokemonList.value?.data))
             try {
@@ -66,7 +109,7 @@ class PokeViewModel(private val pokeRepository: PokeRepository) : ViewModel() {
         }
     }
 
-    fun getPokemonDetail(pokemonName: String) {
+    fun setPokemonDetail(pokemonName: String) {
         viewModelScope.launch(Dispatchers.IO) {
             _pokemonDetail.postValue(Resource.Loading(_pokemonDetail.value?.data))
             try {
@@ -92,53 +135,30 @@ class PokeViewModel(private val pokeRepository: PokeRepository) : ViewModel() {
         }
     }
 
-    fun setIsFavourite() {
-        _pokemonDetail.value?.data?.let { pokemonDetail ->
-            if (pokemonDetail.isFavourite) {
-                // Delete from database
-            } else {
-                // Insert to database
+    fun setIsFavourite(pokemon: Pokemon) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _pokemonDetail.value?.data?.let { pokemonDetail ->
+                if (pokemonDetail.isFavourite) {
+                    pokeRepository.deletePokemon(pokemon)
+                } else {
+                    pokeRepository.insertPokemon(pokemon)
+                }
+
+                pokemonDetail.isFavourite = pokeRepository.isFavouritePokemonById(pokemonDetail.id)
+                _pokemonDetail.postValue(Resource.Success(pokemonDetail))
             }
-
-            pokemonDetail.isFavourite = !pokemonDetail.isFavourite // Delete late. Change with...
-            // pokemonDetail.isFavourite = pokeRepository.isFavourite(pokemonDetail.id)         it
-
-            _pokemonDetail.postValue(Resource.Success(pokemonDetail))
         }
     }
 
     fun isLastPokemonListPage(): Boolean {
-        if (_pokemonListResponse?.previous?.isNotEmpty() == true && _pokemonListResponse?.next.isNullOrEmpty()) {
-            return true
-        }
-        return false
-    }
-
-    fun clearPokemonListErrorMessage() {
-        _pokemonList.value?.data?.let { pokemonList ->
-            if (pokemonList.isNotEmpty()) {
-                _pokemonList.postValue(
-                    Resource.Error(
-                        _pokemonList.value?.data,
-                        EMPTY_ERROR_MESSAGE
-                    )
-                )
+        _pokemonListResponse?.let { pokemonListResponse ->
+            pokemonListResponse.previous?.let { previous ->
+                if (previous.isNotEmpty() && pokemonListResponse.next.isNullOrEmpty()) {
+                    return true
+                }
             }
         }
-        /*        when (_pokemonList.value) {
-                    is Resource.Error -> {
-                        _pokemonList.value?.data?.let { pokemonList ->
-                            if (pokemonList.isNotEmpty()) {
-                                _pokemonList.postValue(
-                                    Resource.Error(
-                                        _pokemonList.value?.data,
-                                        EMPTY_ERROR_MESSAGE
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }*/
+        return false
     }
 
     fun setBottomNavigationViewVisibility(isVisible: Boolean) {
@@ -175,7 +195,7 @@ class PokeViewModel(private val pokeRepository: PokeRepository) : ViewModel() {
     private fun handlePokemonDetailResponse(response: Response<PokemonDetail>): Resource<PokemonDetail> {
         if (response.isSuccessful) {
             response.body()?.let { pokemonDetail ->
-                // pokemonDetail.isFavourite = pokeRepository.isFavourite(pokemonDetail.id)
+                pokemonDetail.isFavourite = pokeRepository.isFavouritePokemonById(pokemonDetail.id)
                 return Resource.Success(pokemonDetail)
             }
         }

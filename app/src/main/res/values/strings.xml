@@ -10,4 +10,6 @@
     <string name="sp_atk">Sp. Atk</string>
     <string name="sp_def">Sp. Def</string>
     <string name="speed">Speed</string>
+    <string name="you_don_t_have_favourite_pokemon_yet">You don\'t have favourite pokemon yet…</string>
+    <string name="no_search_results">No search results</string>
 </resources>

@@ -15,7 +15,7 @@ import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.example.pokeapp.PokeApplication
 import com.example.pokeapp.R
-import com.example.pokeapp.data.repository.PokeRepository
+import com.example.pokeapp.repository.PokeRepository
 import com.example.pokeapp.databinding.ActivityPokeBinding
 import com.example.pokeapp.ui.viewModel.PokeViewModel
 import com.example.pokeapp.ui.viewModel.PokeViewModelFactory
