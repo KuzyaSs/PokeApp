@@ -46,7 +46,6 @@ class FavouriteFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity?.applicationContext as PokeApplication).applicationComponent.inject(this)
-
         setUpRecyclerView()
         setUpListeners()
         setUpObservers()
@@ -56,14 +55,12 @@ class FavouriteFragment : Fragment() {
         pokemonAdapter = PokemonAdapter { pokemon ->
             viewModel.setPokemonDetail(pokemon.name)
             try {
-                val action =
-                    FavouriteFragmentDirections.actionFavouriteFragmentToDetailFragment(pokemon)
+                val action = FavouriteFragmentDirections.actionFavouriteFragmentToDetailFragment(
+                    pokemon
+                )
                 findNavController().navigate(action)
-            } catch (_: Throwable) {
-
-            }
+            } catch (_: Throwable) { }
         }
-
         binding.recyclerViewPokemonList.apply {
             adapter = pokemonAdapter
             layoutManager = GridLayoutManager(context, SPAN_COUNT)
@@ -75,7 +72,6 @@ class FavouriteFragment : Fragment() {
             textInputLayoutSearch.setEndIconOnClickListener {
                 binding.textInputEditTextSearch.text?.clear()
             }
-
             textInputEditTextSearch.addTextChangedListener { editable ->
                 editable?.let {
                     val searchString = editable.toString()
@@ -110,7 +106,6 @@ class FavouriteFragment : Fragment() {
         binding.apply {
             imageViewFavouriteIcon.isVisible = true
             textViewMessage.isVisible = true
-
             if (searchString.isEmpty()) {
                 imageViewFavouriteIcon.setImageResource(R.drawable.ic_favourite)
                 textViewMessage.text = getString(R.string.you_don_t_have_favourite_pokemon_yet)

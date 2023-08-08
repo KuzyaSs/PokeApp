@@ -1,7 +1,7 @@
 package com.example.pokeapp.repository
 
 import androidx.lifecycle.LiveData
-import com.example.pokeapp.data.database.PokeDatabase
+import com.example.pokeapp.data.database.PokeDao
 import com.example.pokeapp.data.database.model.Pokemon
 import com.example.pokeapp.data.remote.PokeService
 import com.example.pokeapp.data.remote.model.PokemonDetail
@@ -10,7 +10,7 @@ import retrofit2.Response
 import javax.inject.Inject
 
 class PokeRepository @Inject constructor(
-    private val database: PokeDatabase,
+    private val pokeDao: PokeDao,
     private val pokeService: PokeService
 ) {
     suspend fun getPokemonList(limit: Int, offset: Int): Response<PokemonListResponse> {
@@ -18,7 +18,7 @@ class PokeRepository @Inject constructor(
     }
 
     fun getFavouritePokemonList(): LiveData<List<Pokemon>> {
-        return database.getPokeDao().getFavouritePokemonList()
+        return pokeDao.getPokemonList()
     }
 
     suspend fun getPokemonDetail(name: String): Response<PokemonDetail> {
@@ -26,15 +26,15 @@ class PokeRepository @Inject constructor(
     }
 
     suspend fun insertPokemon(pokemon: Pokemon) {
-        database.getPokeDao().insert(pokemon)
+        pokeDao.insert(pokemon)
     }
 
     suspend fun deletePokemon(pokemon: Pokemon) {
-        database.getPokeDao().delete(pokemon)
+        pokeDao.delete(pokemon)
     }
 
     fun isFavouritePokemonById(id: Int): Boolean {
-        if (database.getPokeDao().getPokemonById(id) != null) {
+        if (pokeDao.getPokemonById(id) != null) {
             return true
         }
         return false

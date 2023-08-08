@@ -20,5 +20,5 @@ interface PokeDao {
     fun getPokemonById(id: Int): Pokemon?
 
     @Query("SELECT * FROM pokemon")
-    fun getFavouritePokemonList(): LiveData<List<Pokemon>>
+    fun getPokemonList(): LiveData<List<Pokemon>>
 }

@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI.setupWithNavController
@@ -15,8 +14,8 @@ import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.example.pokeapp.PokeApplication
 import com.example.pokeapp.R
-import com.example.pokeapp.repository.PokeRepository
 import com.example.pokeapp.databinding.ActivityPokeBinding
+import com.example.pokeapp.repository.PokeRepository
 import com.example.pokeapp.ui.viewModel.PokeViewModel
 import com.example.pokeapp.ui.viewModel.PokeViewModelFactory
 import javax.inject.Inject
@@ -38,34 +37,35 @@ class PokeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         _binding = ActivityPokeBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         (applicationContext as PokeApplication).applicationComponent.inject(this)
+        setUpNavigation()
+        setUpObservers()
+    }
 
+    private fun setUpNavigation() {
         val bottomNavigationView = binding.bottomNavigationView
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.navHostFragment) as NavHostFragment
         navController = navHostFragment.navController
         setupWithNavController(bottomNavigationView, navController)
+    }
 
+    private fun setUpObservers() {
         viewModel.bottomNavigationViewVisibility.observe(this) { isVisible ->
             if (isVisible) {
-                binding.bottomNavigationView.show()
+                binding.bottomNavigationView.isVisible = true
             } else {
                 binding.bottomNavigationView.hide()
             }
         }
     }
 
-    private fun View.show() {
-        if (!isVisible) {
-            TransitionManager.beginDelayedTransition(this.parent as ViewGroup, Slide(Gravity.BOTTOM))
-            isVisible = true
-        }
-    }
-
     private fun View.hide() {
         if (isVisible) {
-            TransitionManager.beginDelayedTransition(this.parent as ViewGroup, Slide(Gravity.BOTTOM))
+            TransitionManager.beginDelayedTransition(
+                this.parent as ViewGroup,
+                Slide(Gravity.BOTTOM)
+            )
             isVisible = false
         }
     }

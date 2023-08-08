@@ -3,7 +3,6 @@
     <string name="search">Search</string>
     <string name="favourite">Favourite</string>
     <string name="try_again">Try again</string>
-    <string name="id">#%1$s</string>
     <string name="hp">HP</string>
     <string name="attack">Attack</string>
     <string name="defense">Defense</string>

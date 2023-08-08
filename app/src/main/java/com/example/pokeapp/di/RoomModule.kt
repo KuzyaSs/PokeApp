@@ -1,14 +1,11 @@
 package com.example.pokeapp.di
 
 import android.app.Application
-import android.content.Context
 import androidx.room.Room
+import com.example.pokeapp.data.database.PokeDao
 import com.example.pokeapp.data.database.PokeDatabase
-import com.example.pokeapp.data.remote.PokeService
-import com.example.pokeapp.repository.PokeRepository
 import dagger.Module
 import dagger.Provides
-import javax.inject.Singleton
 
 @Module
 class RoomModule {
@@ -19,5 +16,10 @@ class RoomModule {
             PokeDatabase::class.java,
             "poke_database"
         ).build()
+    }
+
+    @Provides
+    fun providePokeDao(database: PokeDatabase): PokeDao {
+        return database.getPokeDao()
     }
 }

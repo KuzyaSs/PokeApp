@@ -47,7 +47,6 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity?.applicationContext as PokeApplication).applicationComponent.inject(this)
-
         setUpRecyclerView()
         setUpListeners()
         setUpObservers()
@@ -59,11 +58,8 @@ class SearchFragment : Fragment() {
             try {
                 val action = SearchFragmentDirections.actionSearchFragmentToDetailFragment(pokemon)
                 findNavController().navigate(action)
-            } catch (_: Throwable) {
-
-            }
+            } catch (_: Throwable) { }
         }
-
         binding.recyclerViewPokemonList.apply {
             adapter = pokemonAdapter
             layoutManager = GridLayoutManager(context, SPAN_COUNT)
@@ -81,16 +77,11 @@ class SearchFragment : Fragment() {
             textInputLayoutSearch.setEndIconOnClickListener {
                 binding.textInputEditTextSearch.text?.clear()
             }
-
             textInputEditTextSearch.addTextChangedListener { editable ->
                 editable?.let {
                     val searchString = editable.toString()
                     setPokemonList(searchString)
                 }
-            }
-
-            buttonTryAgain.setOnClickListener {
-                viewModel.setPokemonList()
             }
         }
     }
@@ -98,13 +89,11 @@ class SearchFragment : Fragment() {
     private fun setUpObservers() {
         viewModel.pokemonList.observe(viewLifecycleOwner) { pokemonListResource ->
             when (pokemonListResource) {
-
                 is Resource.Success, is Resource.Error -> {
                     hideProgressBar()
                     val searchString = binding.textInputEditTextSearch.text.toString()
                     setPokemonList(searchString)
                 }
-
                 is Resource.Loading -> {
                     showProgressBar()
                 }

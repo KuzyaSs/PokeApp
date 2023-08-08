@@ -3,12 +3,14 @@ package com.example.pokeapp.ui.other
 import android.widget.AbsListView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.pokeapp.util.Constants.Companion.POKEMON_LIST_LOAD_DELAY
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class PokemonScrollListener(private val onScrolled: (Unit) -> Unit) : RecyclerView.OnScrollListener() {
+class PokemonScrollListener(private val onScrolled: (Unit) -> Unit) :
+    RecyclerView.OnScrollListener() {
     private var _isScrolling = false
     private var loadNewPokemonListJob: Job? = null
     override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -30,7 +32,7 @@ class PokemonScrollListener(private val onScrolled: (Unit) -> Unit) : RecyclerVi
         if (isLastItem) {
             loadNewPokemonListJob?.cancel()
             loadNewPokemonListJob = MainScope().launch {
-                delay(500)
+                delay(POKEMON_LIST_LOAD_DELAY)
                 onScrolled(Unit)
             }
         }

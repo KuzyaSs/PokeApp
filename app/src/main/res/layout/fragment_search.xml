@@ -21,7 +21,8 @@
             android:id="@+id/textInputEditTextSearch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:inputType="text"
+            android:textColor="?attr/colorPrimary" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -34,40 +35,6 @@
         android:paddingBottom="55dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textInputLayoutSearch" />
-
-    <ImageView
-        android:id="@+id/imageViewErrorIcon"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="200dp"
-        android:importantForAccessibility="no"
-        android:src="@drawable/ic_error"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="@id/recyclerViewPokemonList"
-        app:layout_constraintStart_toStartOf="@id/recyclerViewPokemonList"
-        app:layout_constraintTop_toTopOf="@id/recyclerViewPokemonList" />
-
-    <TextView
-        android:id="@+id/textViewErrorMessage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/imageViewErrorIcon" />
-
-    <Button
-        android:id="@+id/buttonTryAgain"
-        style="?attr/materialButtonOutlinedStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/try_again"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textViewErrorMessage" />
 
     <ImageView
         android:id="@+id/imageViewEmptyIcon"
@@ -87,6 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="@string/no_search_results"
+        android:textColor="?attr/colorPrimary"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -27,8 +27,7 @@ class PokeViewModel(private val pokeRepository: PokeRepository) : ViewModel() {
     private val _pokemonList = MutableLiveData<Resource<MutableList<Pokemon>>>()
     val pokemonList: LiveData<Resource<MutableList<Pokemon>>> get() = _pokemonList
 
-    private var _favouritePokemonList: LiveData<List<Pokemon>> =
-        pokeRepository.getFavouritePokemonList()
+    private var _favouritePokemonList: LiveData<List<Pokemon>> = pokeRepository.getFavouritePokemonList()
     val favouritePokemonList: LiveData<List<Pokemon>> get() = _favouritePokemonList
 
     private val _pokemonDetail = MutableLiveData<Resource<PokemonDetail>>()
@@ -94,7 +93,6 @@ class PokeViewModel(private val pokeRepository: PokeRepository) : ViewModel() {
                             NETWORK_ERROR_MESSAGE
                         )
                     )
-
                     else -> _pokemonList.postValue(
                         Resource.Error(
                             _pokemonList.value?.data,
@@ -120,7 +118,6 @@ class PokeViewModel(private val pokeRepository: PokeRepository) : ViewModel() {
                             NETWORK_ERROR_MESSAGE
                         )
                     )
-
                     else -> _pokemonDetail.postValue(
                         Resource.Error(
                             _pokemonDetail.value?.data,
@@ -140,7 +137,6 @@ class PokeViewModel(private val pokeRepository: PokeRepository) : ViewModel() {
                 } else {
                     pokeRepository.insertPokemon(pokemon)
                 }
-
                 pokemonDetail.isFavourite = pokeRepository.isFavouritePokemonById(pokemonDetail.id)
                 _pokemonDetail.postValue(Resource.Success(pokemonDetail))
             }

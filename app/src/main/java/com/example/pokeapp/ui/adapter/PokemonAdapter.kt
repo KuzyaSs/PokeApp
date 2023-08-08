@@ -41,11 +41,9 @@ class PokemonAdapter(private val onItemClicked: (Pokemon) -> Unit) :
                     .load(pokemon.imageUrl)
                     .placeholder(R.drawable.anim_loading)
                     .into(imageViewSprite)
-
                 textViewName.text = pokemon.name.replaceFirstChar { firstChar ->
                     firstChar.uppercaseChar()
                 }
-
                 root.setOnClickListener {
                     onItemClicked(pokemon)
                 }
