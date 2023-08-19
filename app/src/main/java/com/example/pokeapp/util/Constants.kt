@@ -5,6 +5,7 @@ import com.example.pokeapp.R
 class Constants {
     companion object {
         const val BASE_URL = "https://pokeapi.co/api/v2/"
+        const val BASE_POKEMON_URL = "https://pokeapi.co/api/v2/pokemon/"
         const val BASE_IMAGE_URL = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/"
 
         const val DEFAULT_RESPONSE_LIMIT = 20
@@ -12,6 +13,7 @@ class Constants {
 
         const val POKEMON_LIST_LOAD_DELAY = 500L
 
+        const val EMPTY_STRING = ""
         const val NETWORK_ERROR_MESSAGE = "Network error"
         const val CONVERSION_ERROR_MESSAGE = "Conversion error"
         const val ERROR_POKEMON_ID = -1

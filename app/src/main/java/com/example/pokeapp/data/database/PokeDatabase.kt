@@ -2,10 +2,10 @@ package com.example.pokeapp.data.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.example.pokeapp.data.database.model.Pokemon
+import com.example.pokeapp.data.database.model.PokemonEntity
 
 @Database(
-    entities = [Pokemon::class],
+    entities = [PokemonEntity::class],
     version = 1,
     exportSchema = false
 )

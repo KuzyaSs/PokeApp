@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace 'com.example.pokeapp'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.example.pokeapp"
         minSdk 27
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -43,7 +43,7 @@ android {
 dependencies {
     def room_version = "2.5.2"
     def coroutines_version = '1.7.1'
-    def nav_version = "2.6.0"
+    def nav_version = "2.7.0"
     def lifecycle_version = "2.6.1"
     def dagger_version = "2.43.2"
 

@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/searchFragment"
-        android:name="com.example.pokeapp.ui.fragment.SearchFragment"
+        android:name="com.example.pokeapp.presentation.fragment.SearchFragment"
         android:label="SearchFragment">
         <action
             android:id="@+id/action_searchFragment_to_detailFragment"
@@ -19,16 +19,16 @@
 
     <fragment
         android:id="@+id/detailFragment"
-        android:name="com.example.pokeapp.ui.fragment.DetailFragment"
+        android:name="com.example.pokeapp.presentation.fragment.DetailFragment"
         android:label="DetailFragment">
         <argument
             android:name="pokemon"
-            app:argType="com.example.pokeapp.data.database.model.Pokemon" />
+            app:argType="com.example.pokeapp.domain.model.Pokemon" />
     </fragment>
 
     <fragment
         android:id="@+id/favouriteFragment"
-        android:name="com.example.pokeapp.ui.fragment.FavouriteFragment"
+        android:name="com.example.pokeapp.presentation.fragment.FavouriteFragment"
         android:label="FavouriteFragment">
         <action
             android:id="@+id/action_favouriteFragment_to_detailFragment"
